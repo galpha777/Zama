@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Zama Quiz — Test Your Knowledge</title>
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAZlBMVEUAAAD///////////////////////////////////////////////////////////////////////////////////////////////////////////////////8m3qz8AAAAH3RSTlMAAQIDBAUGBwgJCgsMDQ4QERITFBUWFxgZGh0dI0kqWwAAAKhJREFUSMftk9sOgkAQhr8Qk2y2bG2b////6xQqQp3n3nTt1k8k1kN4yqH2Qn3y4iGQw9mY8gVqJ2H5xG4E5oYJ2o5sZ0s8w2s4n+u9g9l3z6z8A5Mgl7k1GkRGlbQmWkQmWkQmWkQmWkQmWkQmWkQmWkQmWkQmWkQmWkQqWg5x4gD7h/0f3Djg/MwAAAABJRU5ErkJggg==" />
+
+<style>
+:root{
+  --bg1:#FFD600;
+  --bg2:#ffed66;
+  --card:#fff;
+  --accent:#111;
+  --muted:#666;
+  --success:#28a745;
+  --danger:#e55353;
+  --glass: rgba(255,255,255,0.7);
+  --radius:16px;
+  --max-width:960px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+body{
+  background: radial-gradient(800px 400px at 10% 20%, rgba(255,230,0,0.18), transparent 10%),
+              radial-gradient(600px 300px at 90% 80%, rgba(255,200,0,0.12), transparent 10%),
+              linear-gradient(180deg,var(--bg1),var(--bg2));
+  display:flex;align-items:center;justify-content:center;padding:28px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* main container */
+.app {
+  width:100%;
+  max-width:var(--max-width);
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+  border-radius: calc(var(--radius) + 8px);
+  padding:28px;
+  box-shadow: 0 12px 40px rgba(17,17,17,0.12);
+  border: 1px solid rgba(0,0,0,0.04);
+  overflow:hidden;
+}
+
+/* header */
+.header{
+  text-align:center;
+  margin-bottom:18px;
+}
+.logo img{width:120px;height:auto;margin:0 auto;display:block;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+.h-title{font-size:34px;font-weight:800;margin-top:12px;color:var(--accent);letter-spacing:0.2px}
+.h-sub{font-size:15px;color:var(--muted);margin-top:6px}
+
+/* top bar (progress and counter) */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;margin-top:18px;margin-bottom:18px;
+  gap:12px;
+}
+.progress-wrap{flex:1;margin-right:16px}
+.progress{
+  height:12px;background:linear-gradient(90deg, rgba(0,0,0,0.06), rgba(0,0,0,0.03));border-radius:999px;overflow:hidden;
+  box-shadow: inset 0 -2px 6px rgba(0,0,0,0.03);
+}
+.progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#111,rgba(0,0,0,0.7));border-radius:999px;transition:width .45s cubic-bezier(.2,.9,.3,1);}
+.q-counter{min-width:140px;text-align:right;color:var(--muted);font-weight:600}
+
+/* card */
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:22px;
+  box-shadow:0 8px 30px rgba(16,24,40,0.04);
+}
+
+/* question */
+.question{
+  font-size:20px;font-weight:700;color:#0d0d0d;margin-bottom:14px;
+}
+.meta{display:flex;gap:12px;align-items:center;margin-bottom:14px;color:var(--muted);font-size:13px}
+
+/* options grid */
+.options{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.option{
+  background: linear-gradient(180deg,#fff,#fbfbfb);
+  border:1px solid rgba(0,0,0,0.06);
+  padding:14px;border-radius:10px;cursor:pointer;
+  transition: all .18s ease;display:flex;align-items:center;gap:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.03);
+  user-select:none;
+}
+.option:hover{transform:translateY(-4px);box-shadow:0 18px 30px rgba(0,0,0,0.06)}
+.option .label{width:36px;height:36px;border-radius:8px;background:rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;font-weight:700;color:#111}
+.option .txt{flex:1;color:#111}
+.option.disabled{opacity:0.6;pointer-events:none}
+.option.correct{border:2px solid var(--success);background:linear-gradient(180deg, rgba(40,167,69,0.06), #fff);}
+.option.incorrect{border:2px solid var(--danger);background:linear-gradient(180deg, rgba(229,83,83,0.06), #fff);opacity:1}
+
+/* actions */
+.actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:18px}
+.btn{
+  background:#111;color:var(--bg2);padding:12px 18px;border-radius:10px;border:none;font-weight:700;cursor:pointer;
+  box-shadow: 0 8px 20px rgba(17,17,17,0.08);transition:transform .14s ease,opacity .12s;
+}
+.btn.secondary{background:transparent;border:1px solid rgba(17,17,17,0.06);color:var(--accent);font-weight:700}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* start screen */
+.start-screen{display:flex;flex-direction:column;align-items:center;gap:14px;padding:36px 10px}
+.start-screen .lead{font-size:18px;color:var(--muted);max-width:760px}
+.start-screen .card{max-width:780px}
+
+/* result screen */
+.result-wrap{text-align:center;padding:28px}
+.score{
+  width:160px;height:160px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:800;color:#fff;margin-bottom:12px;
+  background:linear-gradient(135deg,#111,#444);
+  box-shadow:0 14px 40px rgba(17,17,17,0.14);
+}
+.break{display:flex;gap:18px;justify-content:center;margin-top:12px;color:var(--muted);font-weight:700}
+.break .item{background:rgba(0,0,0,0.03);padding:12px 18px;border-radius:10px}
+
+/* review list */
+.review-list{margin-top:18px}
+.review-item{padding:12px;background:rgba(0,0,0,0.02);border-radius:10px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.review-item .meta{flex:1}
+.correct-badge{background:var(--success);color:#fff;padding:6px 10px;border-radius:999px;font-weight:700}
+
+/* responsive */
+@media (max-width:720px){
+  .options{grid-template-columns:1fr; }
+  .topbar{flex-direction:column;align-items:flex-start}
+  .q-counter{text-align:left}
+  .logo img{width:110px}
+  .h-title{font-size:28px}
+}
+
+.small{font-size:13px;color:var(--muted)}
+.help{color:var(--muted);font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="Zama Quiz App">
+
+  <div class="header">
+    <div class="logo" aria-hidden="true">
+   <div class="h-title">Zama Quiz</div>
+    <div class="h-sub">Test Your Knowledge</div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="startScreen" class="start-screen card">
+    <div style="max-width:680px">
+      <h2 style="margin:0 0 6px 0">Welcome 👋</h2>
+      <div class="lead">This interactive quiz covers Zama — Fully Homomorphic Encryption and confidential on-chain primitives. 20 questions, instant feedback, and a review mode at the end. Good luck!</div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:14px">
+      <button class="btn" id="beginBtn">Start Quiz</button>
+      <button class="btn secondary" id="howBtn">How it works</button>
+    </div>
+
+    <div class="help small">Tip: use 1-4 keys to pick options quickly, or click/tap an option.</div>
+  </div>
+
+  <!-- Quiz Content -->
+  <div id="quizContent" style="display:none">
+    <div class="topbar">
+      <div class="progress-wrap" aria-hidden="true">
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <i id="progressFill"></i>
+        </div>
+      </div>
+      <div class="q-counter"><span id="currentQ">1</span> / <span id="totalQ">20</span></div>
+    </div>
+
+    <div class="card" id="cardArea">
+      <div class="meta small"><span id="timeEl">⏱ 00:00</span><span style="margin-left:8px">•</span><span style="margin-left:8px" id="difficulty">FHE / Privacy</span></div>
+      <div class="question" id="questionText">Question text</div>
+
+      <div class="options" id="optionsWrap" role="list"></div>
+
+      <div class="actions">
+        <button class="btn secondary" id="prevBtn">Previous</button>
+        <button class="btn" id="nextBtn" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="resultScreen" style="display:none" class="card result-wrap">
+    <div class="score" id="scoreCircle">0%</div>
+    <div style="font-weight:800;font-size:20px" id="resultMsg">Your result</div>
+
+    <div class="break" aria-hidden="true">
+      <div class="item">Correct: <span id="correctCount">0</span></div>
+      <div class="item">Incorrect: <span id="incorrectCount">0</span></div>
+      <div class="item">Total: <span id="totalCount">0</span></div>
+    </div>
+
+    <div style="margin-top:14px">
+      <button class="btn" id="restartBtn">Retry Quiz</button>
+      <button class="btn secondary" id="reviewBtn">Review Answers</button>
+    </div>
+
+    <div id="reviewList" class="review-list" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------------------------
+   Quiz Data (20 questions)
+   --------------------------- */
+const quizData = [
+{q:"What does the Zama Protocol enable on any L1 or L2 blockchain?", o:["Faster transaction speeds","Confidential smart contracts using encryption","Cheaper gas fees only","Only stablecoin transfers"], a:1},
+{q:"What technology powers Zama’s confidentiality for on-chain data?", o:["Zero-knowledge proofs (ZK)","Multi-party computation (MPC)","Fully Homomorphic Encryption (FHE)","Trusted Execution Environments (TEE)"], a:2},
+{q:"Why does Zama use coprocessors in its architecture?", o:["To increase gas fees","To offload FHE computation and keep gas fees low","To reduce security","To store user data"], a:1},
+{q:"Which of the following use cases is not explicitly listed on Zama’s site for confidentiality?", o:["Confidential token swaps and lending","Confidential stablecoin payments","Public, unencrypted token sales only","Confidential sealed-bid auctions"], a:2},
+{q:"According to the site, how many transactions per second (tps) can Zama already process per chain?", o:["5 tps","10 tps","20 tps","100 tps"], a:2},
+{q:"What is Zama’s goal regarding scalability with future hardware (ASICs)?", o:["To maintain 20 tps","To reach 1,000 tps per chain","To reach 10,000+ tps per chain","To limit to 100 tps for security"], a:2},
+{q:"Which programming language is mentioned as “all you need” to build with the Zama Protocol?", o:["Python","Rust","Solidity","JavaScript"], a:2},
+{q:"What feature does Zama provide to support compliance when using encrypted tokens?", o:["Fixed rules that cannot be changed","Programmable compliance defined in smart contracts","No compliance support at all","External compliance auditing only"], a:1},
+{q:"Which of the following statements about Zama is listed on the site?", o:["Zama is less secure than MPC","Zama is decentralized, secure, verifiable and scalable","Zama is less composable than ZK proofs","Zama uses private chains instead of public ones"], a:1},
+{q:"What is the status of Zama’s mainnet (as per the site)?", o:["Already live","No testnet yet","Public testnet is live — mainnet coming soon","Project cancelled"], a:2},
+{q:"Which of these is not listed among Zama’s ecosystem components on the site?", o:["Confidential token association","Confidential on-chain finance","Traditional banking system","FHE State OS"], a:2},
+{q:"Why does Zama believe confidentiality is important for blockchains?", o:["To make all transactions public","Because blockchain transparency is a “bug, not a feature”","To increase transaction fees","To allow private blockchains only"], a:1},
+{q:"What repository model does Zama use to provide its tools and libraries?", o:["Closed source proprietary license","Open source on public platforms (e.g. GitHub)","Only available to paying customers","Shared privately among large enterprises"], a:1},
+{q:"Which organization did Zama join as an in-kind partner?", o:["Ethereum Foundation","Datasphere Initiative","World Bank","Linux Foundation"], a:1},
+{q:"What does the smallest unit “euint” in Zama contracts represent?", o:["A regular Ethereum uint","An encrypted unsigned integer","A variable for addresses","A cryptographic hash"], a:1},
+{q:"What does Zama claim about its FHE performance compared to 5 years ago?", o:["It is slower now","No change","Over 100× faster","Roughly 2× faster"], a:2},
+{q:"Which of these is NOT a promise made by Zama about user privacy?", o:["Data stays encrypted at all times","On-chain data decryption is public","Confidentiality with public verifiability","Transaction amounts and balances encrypted and only seeable by correct permissions"], a:1},
+{q:"How does Zama plan to support developers using its protocol?", o:["By selling closed-source SDKs","Through an open Developer Program with resources, support, and rewards","By charging high licensing fees","By only allowing enterprise clients"], a:1},
+{q:"What is one benefit of using Zama’s confidential tokens instead of traditional public tokens?", o:["Slower transactions","Hiding identities permanently","Confidential token swaps, lending, stablecoin payments, while remaining verifiable and compliant","Removing compliance and regulation entirely"], a:2},
+{q:"What is the main ambition behind Zama’s open-source and community-based approach?", o:["To build a private blockchain only for insiders","To spread FHE widely and make privacy default in applications","To maximize profits quickly","To restrict access to selected developers"], a:1}
+];
+
+const totalQ = quizData.length;
+let state = {
+  current:0,
+  selected: Array(totalQ).fill(null), // index of selected option
+  score:0,
+  startTime:null,
+  timePerQ: Array(totalQ).fill(0)
+};
+
+/* DOM refs */
+const startScreen = document.getElementById('startScreen');
+const beginBtn = document.getElementById('beginBtn');
+const howBtn = document.getElementById('howBtn');
+const quizContent = document.getElementById('quizContent');
+const questionText = document.getElementById('questionText');
+const optionsWrap = document.getElementById('optionsWrap');
+const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
+const currentQEl = document.getElementById('currentQ');
+const totalQEl = document.getElementById('totalQ');
+const progressFill = document.getElementById('progressFill');
+const timeEl = document.getElementById('timeEl');
+const scoreCircle = document.getElementById('scoreCircle');
+const resultScreen = document.getElementById('resultScreen');
+const resultMsg = document.getElementById('resultMsg');
+const correctCountEl = document.getElementById('correctCount');
+const incorrectCountEl = document.getElementById('incorrectCount');
+const totalCountEl = document.getElementById('totalCount');
+const reviewBtn = document.getElementById('reviewBtn');
+const reviewList = document.getElementById('reviewList');
+const restartBtn = document.getElementById('restartBtn');
+
+/* initialization */
+totalQEl.innerText = totalQ;
+
+function formatTime(s){
+  const mm = String(Math.floor(s/60)).padStart(2,'0');
+  const ss = String(s%60).padStart(2,'0');
+  return mm+':'+ss;
+}
+
+function startQuiz(){
+  startScreen.style.display = 'none';
+  quizContent.style.display = 'block';
+  state.startTime = Date.now();
+  state.current = 0;
+  renderQuestion();
+  updateProgress();
+  startTimer();
+  beginBtn.blur();
+}
+beginBtn.addEventListener('click', startQuiz);
+
+howBtn.addEventListener('click', ()=> alert("Pick an answer (click/tap or press keys 1-4). Next moves forward. Review answers after finishing."));
+
+/* timer per question */
+let qStart = null;
+let timerInterval = null;
+function startTimer(){
+  qStart = Date.now();
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(()=> {
+    const elapsed = Math.floor((Date.now() - state.startTime)/1000);
+    timeEl.innerText = '⏱ ' + formatTime(elapsed);
+  }, 500);
+}
+function stopTimer(){
+  if(timerInterval) { clearInterval(timerInterval); timerInterval = null;}
+}
+
+/* render question */
+function renderQuestion(){
+  const i = state.current;
+  const item = quizData[i];
+  questionText.innerText = item.q;
+  optionsWrap.innerHTML = '';
+  item.o.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.setAttribute('data-idx', idx);
+    div.innerHTML = `<div class="label">${'ABCD'[idx]}</div><div class="txt">${opt}</div>`;
+    div.addEventListener('click', ()=> selectOption(idx, div));
+    optionsWrap.appendChild(div);
+  });
+
+  // restore selection if existed
+  const selected = state.selected[i];
+  if(selected !== null){
+    const nodes = optionsWrap.querySelectorAll('.option');
+    nodes[selected].classList.add('disabled');
+  }
+
+  // buttons
+  prevBtn.disabled = (i===0);
+  nextBtn.disabled = (state.selected[i]===null);
+
+  currentQEl.innerText = i+1;
+  updateProgress();
+  qStart = Date.now();
+}
+
+/* handle option select */
+function selectOption(idx, el){
+  const i = state.current;
+  // lock selection for question
+  if(state.selected[i] !== null) return;
+  state.selected[i] = idx;
+  // compute time for this Q
+  state.timePerQ[i] = Math.round((Date.now()-qStart)/1000);
+  // mark options
+  const nodes = optionsWrap.querySelectorAll('.option');
+  nodes.forEach((n, j) => {
+    n.classList.add('disabled');
+    if(j === quizData[i].a) n.classList.add('correct');
+    if(j === idx && j !== quizData[i].a) n.classList.add('incorrect');
+  });
+  // update score incrementally
+  if(idx === quizData[i].a) state.score++;
+  // enable next
+  nextBtn.disabled = false;
+}
+
+/* navigation */
+nextBtn.addEventListener('click', ()=>{
+  state.current++;
+  if(state.current >= totalQ) finishQuiz();
+  else renderQuestion();
+});
+prevBtn.addEventListener('click', ()=>{
+  if(state.current>0) state.current--; renderQuestion();
+});
+
+/* keyboard support 1-4 and Enter for next */
+document.addEventListener('keydown',(e)=>{
+  if(quizContent.style.display === 'none') return;
+  const k = e.key;
+  if(['1','2','3','4'].includes(k)){
+    const idx = parseInt(k,10)-1;
+    const node = optionsWrap.querySelector(`.option[data-idx="${idx}"]`);
+    if(node) node.click();
+  } else if(k === 'Enter'){
+    if(!nextBtn.disabled) nextBtn.click();
+  }
+});
+
+/* progress */
+function updateProgress(){
+  const pct = Math.round((state.current/totalQ)*100);
+  progressFill.style.width = pct + '%';
+  progressFill.parentElement.setAttribute('aria-valuenow', pct);
+}
+
+/* finish */
+function finishQuiz(){
+  stopTimer();
+  quizContent.style.display = 'none';
+  resultScreen.style.display = 'block';
+  const correct = state.score;
+  const incorrect = totalQ - correct;
+  correctCountEl.innerText = correct;
+  incorrectCountEl.innerText = incorrect;
+  totalCountEl.innerText = totalQ;
+  const pct = Math.round((correct/totalQ)*100);
+  scoreCircle.innerText = pct + '%';
+  // style score circle colors
+  if(pct>=80) scoreCircle.style.background = 'linear-gradient(135deg,#0b6b3a,#2bb673)';
+  else if(pct>=60) scoreCircle.style.background = 'linear-gradient(135deg,#ff8a00,#ffc857)';
+  else if(pct>=40) scoreCircle.style.background = 'linear-gradient(135deg,#2196F3,#66b3ff)';
+  else scoreCircle.style.background = 'linear-gradient(135deg,#e55353,#ff8a8a)';
+  resultMsg.innerText = pct>=80? "🏆 Excellent! You're a quiz master!" : pct>=60? "👏 Good job! You did well!" : pct>=40? "👍 Not bad — keep practicing!" : "💪 Don't give up — try again!";
+}
+
+/* review */
+reviewBtn.addEventListener('click', ()=>{
+  reviewList.style.display = reviewList.style.display === 'none' ? 'block' : 'none';
+  if(reviewList.style.display === 'block') renderReview();
+});
+
+function renderReview(){
+  reviewList.innerHTML = '';
+  quizData.forEach((q, i) => {
+    const sel = state.selected[i];
+    const isCorrect = sel === q.a;
+    const item = document.createElement('div');
+    item.className='review-item';
+    item.innerHTML = `
+      <div style="width:46px;"><div style="font-weight:800">${i+1}</div></div>
+      <div class="meta">
+        <div style="font-weight:700;margin-bottom:6px">${q.q}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${q.o.map((opt, idx)=>`<div style="padding:6px 10px;border-radius:8px;background:${idx===q.a? 'rgba(40,167,69,0.12)': idx===sel? (isCorrect? 'rgba(40,167,69,0.06)':'rgba(229,83,83,0.06)') : 'transparent'};border:1px solid ${idx===q.a? 'rgba(40,167,69,0.18)':'rgba(0,0,0,0.04)'};margin-right:6px">${String.fromCharCode(65+idx)}. ${opt}</div>`).join('')}
+        </div>
+        <div style="margin-top:8px;color:${isCorrect? '#2a8f4a':'#d9534f'};font-weight:700">${isCorrect? 'Correct':'Incorrect'}</div>
+      </div>
+    `;
+    reviewList.appendChild(item);
+  });
+}
+
+/* restart */
+restartBtn.addEventListener('click', ()=>{
+  // reset state
+  state.current = 0; state.score = 0; state.selected = Array(totalQ).fill(null); state.timePerQ = Array(totalQ).fill(0);
+  resultScreen.style.display = 'none';
+  startScreen.style.display = 'flex';
+  reviewList.innerHTML = '';
+  reviewList.style.display = 'none';
+  startQuiz();
+});
+
+/* Accessibility: announce live updates (basic) */
+function announce(msg){
+  const el = document.getElementById('liveAnnounce') || (()=>{const d = document.createElement('div'); d.id='liveAnnounce'; d.setAttribute('aria-live','polite'); d.style.position='absolute'; d.style.left='-9999px'; document.body.appendChild(d); return d;})();
+  el.innerText = msg;
+}
+
+/* Start button auto-focus for keyboard users */
+beginBtn.focus();
+
+/* Pre-fill total count */
+document.getElementById('totalQ').innerText = totalQ;
+
+/* small enhancement: click next when selection made and user waits 1s (optional) */
+let autoNextTimeout = null;
+optionsWrap.addEventListener('click', (e)=>{
+  // nothing here, options handle themselves
+});
+
+/* ensure initial state */
+updateProgress();
+
+</script>
+</body>
+</html>
